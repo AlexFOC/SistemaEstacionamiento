@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${titulo} + ' - Sistema de Parqueadero'">Reporte Detalle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .summary-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .summary-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        
+        .summary-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .table-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .table-header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .placa {
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .total-positivo {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+        }
+        
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        
+        .btn-info {
+            background-color: #17a2b8;
+        }
+        
+        .btn-info:hover {
+            background-color: #138496;
+        }
+        
+        .actions-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .no-data .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .filter-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .period-badge {
+            background: #007bff;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 th:text="${titulo}">📊 Reporte Detalle</h1>
+            <p>
+                Período: <span th:text="${desde}"></span> al <span th:text="${hasta}"></span>
+                <span class="period-badge" 
+                      th:text="${#temporals.format(desde, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(hasta, 'dd/MM/yyyy')}">
+                </span>
+            </p>
+        </div>
+        
+        <!-- Información del Período -->
+        <div class="filter-info">
+            <strong>📅 Período de Análisis:</strong> 
+            Desde <span th:text="${#temporals.format(desde, 'dd/MM/yyyy')}"></span> 
+            hasta <span th:text="${#temporals.format(hasta, 'dd/MM/yyyy')}"></span>
+        </div>
+        
+        <!-- Resumen -->
+        <div class="summary-section">
+            <h3>📈 Resumen Ejecutivo</h3>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-number" th:text="${totalVehiculos}">0</div>
+                    <div class="summary-label">Vehículos Atendidos</div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-number">$<span th:text="${#numbers.formatDecimal(totalIngresos, 1, 2)}">0.00</span></div>
+                    <div class="summary-label">Ingresos Totales</div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-number">$<span th:text="${totalVehiculos > 0 ? #numbers.formatDecimal(totalIngresos / totalVehiculos, 1, 2) : '0.00'}">0.00</span></div>
+                    <div class="summary-label">Promedio por Vehículo</div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-number" th:text="${#dates.daysBetween(desde, hasta) + 1}">1</div>
+                    <div class="summary-label">Días Analizados</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabla de Vehículos -->
+        <div class="table-section">
+            <div class="table-header">
+                <h3>🚗 Detalle de Vehículos</h3>
+                <div>
+                    <span th:text="${totalVehiculos}">0</span> registros encontrados
+                </div>
+            </div>
+            
+            <div th:if="${vehiculos != null and !vehiculos.empty}">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Placa</th>
+                                <th>Tipo</th>
+                                <th>Plaza</th>
+                                <th>Hora Entrada</th>
+                                <th>Hora Salida</th>
+                                <th>Tiempo Estacionado</th>
+                                <th>Total Pagado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="vehiculo : ${vehiculos}">
+                                <td class="placa" th:text="${vehiculo.placa}">ABC-123</td>
+                                <td th:text="${vehiculo.tipo ?: vehiculo.tipoVehiculo ?: 'N/A'}">Automóvil</td>
+                                <td th:text="${vehiculo.plazaAsignada ?: 'N/A'}">15</td>
+                                <td th:text="${#temporals.format(vehiculo.horaEntrada, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:30</td>
+                                <td th:text="${vehiculo.horaSalida != null ? #temporals.format(vehiculo.horaSalida, 'dd/MM/yyyy HH:mm') : 'N/A'}">01/01/2025 12:30</td>
+                                <td>
+                                    <span th:if="${vehiculo.horaSalida != null and vehiculo.horaEntrada != null}"
+                                          th:text="${T(java.time.Duration).between(vehiculo.horaEntrada, vehiculo.horaSalida).toHours()} + 'h ' + 
+                                                   ${T(java.time.Duration).between(vehiculo.horaEntrada, vehiculo.horaSalida).toMinutesPart()} + 'm'">
+                                        2h 30m
+                                    </span>
+                                    <span th:unless="${vehiculo.horaSalida != null and vehiculo.horaEntrada != null}">N/A</span>
+                                </td>
+                                <td class="total-positivo">
+                                    $<span th:text="${vehiculo.totalPagar != null ? #numbers.formatDecimal(vehiculo.totalPagar, 1, 2) : '0.00'}">25.00</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div th:if="${vehiculos == null or vehiculos.empty}" class="no-data">
+                <div class="icon">📭</div>
+                <h4>No hay datos para mostrar</h4>
+                <p>No se encontraron vehículos para el período seleccionado.</p>
+            </div>
+        </div>
+        
+        <!-- Acciones -->
+        <div class="actions-section">
+            <h3>📊 Exportar Reporte</h3>
+            <p style="margin-bottom: 20px; color: #6c757d;">Descargue este reporte en diferentes formatos</p>
+            
+            <a th:href="@{/reporte/txt(desde=${desde}, hasta=${hasta})}" class="btn btn-secondary">
+                📄 Descargar TXT
+            </a>
+            
+            <a th:href="@{/reporte/excel(desde=${desde}, hasta=${hasta})}" class="btn btn-success">
+                📊 Descargar Excel
+            </a>
+            
+            <a th:href="@{/reportes}" class="btn btn-info">
+                🔙 Volver a Reportes
+            </a>
+            
+            <a th:href="@{/dashboard}" class="btn">
+                🏠 Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>

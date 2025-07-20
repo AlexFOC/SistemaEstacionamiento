@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva Reserva - Sistema de Parqueadero</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .form-help {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .required {
+            color: #dc3545;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                display: block;
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📅 Nueva Reserva</h1>
+            <p>Crear una nueva reserva de plaza de estacionamiento</p>
+        </div>
+        
+        <!-- Mensajes -->
+        <div th:if="${error}" class="alert alert-danger">
+            <p th:text="${error}"></p>
+        </div>
+        
+        <div th:if="${mensaje}" class="alert alert-success">
+            <p th:text="${mensaje}"></p>
+        </div>
+        
+        <!-- Formulario -->
+        <div class="form-container">
+            <form th:action="@{/gestion-reservas/crear}" method="post" th:object="${reserva}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="vehiculoId">ID del Vehículo <span class="required">*</span></label>
+                        <input type="number" 
+                               id="vehiculoId" 
+                               name="vehiculoId"
+                               class="form-control"
+                               required
+                               placeholder="Ingrese el ID del vehículo" />
+                        <div class="form-help">ID único del vehículo en el sistema</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="plazaId">ID de la Plaza <span class="required">*</span></label>
+                        <input type="text" 
+                               id="plazaId" 
+                               name="plazaId"
+                               class="form-control"
+                               required
+                               placeholder="Ej: P001, A15, etc." />
+                        <div class="form-help">Identificador único de la plaza</div>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="fechaInicioStr">Fecha y Hora de Inicio <span class="required">*</span></label>
+                        <input type="datetime-local" 
+                               id="fechaInicioStr" 
+                               name="fechaInicioStr"
+                               class="form-control"
+                               required />
+                        <div class="form-help">Cuándo inicia la reserva</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fechaFinStr">Fecha y Hora de Fin <span class="required">*</span></label>
+                        <input type="datetime-local" 
+                               id="fechaFinStr" 
+                               name="fechaFinStr"
+                               class="form-control"
+                               required />
+                        <div class="form-help">Cuándo termina la reserva</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" 
+                              name="observaciones"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Comentarios adicionales sobre la reserva (opcional)"></textarea>
+                    <div class="form-help">Información adicional sobre la reserva</div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary">
+                        ✅ Crear Reserva
+                    </button>
+                    <a th:href="@{/gestion-reservas}" class="btn btn-secondary">
+                        ❌ Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Información Adicional -->
+        <div class="form-container">
+            <h3>ℹ️ Información Importante</h3>
+            <ul style="margin-left: 20px; color: #6c757d;">
+                <li>Las reservas deben realizarse con al menos 1 hora de anticipación</li>
+                <li>El tiempo mínimo de reserva es de 1 hora</li>
+                <li>El tiempo máximo de reserva es de 24 horas</li>
+                <li>Las reservas pueden cancelarse hasta 30 minutos antes del inicio</li>
+                <li>Verifique que la plaza esté disponible en el horario seleccionado</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Establecer fecha mínima como ahora + 1 hora
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            now.setHours(now.getHours() + 1);
+            
+            const fechaInicio = document.getElementById('fechaInicioStr');
+            const fechaFin = document.getElementById('fechaFinStr');
+            
+            // Formato para datetime-local
+            const formatDateTime = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            };
+            
+            fechaInicio.min = formatDateTime(now);
+            
+            // Cuando cambie la fecha de inicio, actualizar la mínima de fin
+            fechaInicio.addEventListener('change', function() {
+                if (this.value) {
+                    const inicioDate = new Date(this.value);
+                    inicioDate.setHours(inicioDate.getHours() + 1);
+                    fechaFin.min = formatDateTime(inicioDate);
+                    
+                    // Si la fecha de fin es menor que la nueva mínima, actualizarla
+                    if (fechaFin.value && new Date(fechaFin.value) <= new Date(this.value)) {
+                        fechaFin.value = formatDateTime(inicioDate);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

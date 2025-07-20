@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Vehículos - Sistema de Parqueadero</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #007bff;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .form-control {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .stats-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .table-header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+        
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-completado {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-activo {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .pagination a,
+        .pagination span {
+            padding: 8px 12px;
+            margin: 0 2px;
+            text-decoration: none;
+            border: 1px solid #dee2e6;
+            color: #007bff;
+        }
+        
+        .pagination .current {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .actions-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 18px;">
+                <h1 style="margin-bottom: 0;">📜 Historial de Vehículos</h1>
+                <a th:href="@{/dashboard}" class="btn btn-light" style="min-width: 120px; font-size: 14px; color: #007bff; border: 2px solid #007bff; font-weight: bold; text-decoration: none; margin-left: 40px;">⬅️ Volver al Dashboard</a>
+            </div>
+            <p>Consulte el historial completo de entradas y salidas del parqueadero</p>
+        </div>
+        
+        <!-- Mensajes -->
+        <div th:if="${mensaje}" class="alert alert-success">
+            <p th:text="${mensaje}"></p>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <p th:text="${error}"></p>
+        </div>
+        
+        <!-- Sección de Búsqueda -->
+        <div class="search-section">
+            <h3>🔍 Filtros de Búsqueda</h3>
+                  <form th:action="@{/vehiculos/historial-placa}" method="get" class="search-form">
+                <div class="form-group">
+                    <label for="placa">Placa del Vehículo:</label>
+                    <input type="text" 
+                           id="placa" 
+                           name="placa" 
+                           class="form-control"
+                           th:value="${placa}"
+                           placeholder="ABC-1234"
+                           style="text-transform: uppercase;" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="fechaDesde">Fecha Desde:</label>
+                    <input type="date" 
+                           id="fechaDesde" 
+                           name="fechaDesde" 
+                           class="form-control"
+                           th:value="${fechaDesde}" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="fechaHasta">Fecha Hasta:</label>
+                    <input type="date" 
+                           id="fechaHasta" 
+                           name="fechaHasta" 
+                           class="form-control"
+                           th:value="${fechaHasta}" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoVehiculo">Tipo de Vehículo:</label>
+                    <select id="tipoVehiculo" name="tipo" class="form-control">
+                        <option value="">Todos los tipos</option>
+                        <option value="carro" th:selected="${tipo == 'carro'}">Carro</option>
+                        <option value="moto" th:selected="${tipo == 'moto'}">Moto</option>
+                        <option value="camioneta" th:selected="${tipo == 'camioneta'}">Camioneta</option>
+                        <option value="otro" th:selected="${tipo == 'otro'}">Otro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="estado">Estado:</label>
+                    <select id="estado" name="estado" class="form-control">
+                        <option value="">Todos los estados</option>
+                        <option value="completado" th:selected="${estado == 'completado'}">Completado</option>
+                        <option value="activo" th:selected="${estado == 'activo'}">Activo</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">🔍 Buscar</button>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" class="btn btn-secondary" onclick="limpiarFiltros()">🗑️ Limpiar</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Estadísticas del Historial -->
+        <div th:if="${historial != null and !historial.empty}" class="stats-section">
+            <h3>📊 Estadísticas del Historial</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${#lists.size(historial)}">0</div>
+                    <div class="stat-label">Total de Registros</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${totalIngresos ?: 0}">$0</div>
+                    <div class="stat-label">Ingresos Totales</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${vehiculosActivos ?: 0}">0</div>
+                    <div class="stat-label">Vehículos Activos</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${tiempoPromedioEstadia ?: '0h 0m'}">0h 0m</div>
+                    <div class="stat-label">Tiempo Promedio</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabla de Historial -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3>📋 Resultados del Historial</h3>
+                <div>
+                    <button class="btn btn-success btn-sm" onclick="exportarHistorial()">📊 Exportar Excel</button>
+                    <button class="btn btn-secondary btn-sm" onclick="imprimirHistorial()">🖨️ Imprimir</button>
+                </div>
+            </div>
+            
+            <!-- Estado Vacío -->
+            <div th:if="${historial == null or historial.empty}" class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <h4>No se encontraron registros</h4>
+                <p th:if="${placa == null or placa.isEmpty()}">
+                    Ingrese una placa para buscar el historial de un vehículo específico.
+                </p>
+                <p th:if="${placa != null and !placa.isEmpty()}">
+                    No se encontraron registros para la placa <strong th:text="${placa}">ABC-1234</strong>.
+                </p>
+                <button class="btn btn-primary" onclick="limpiarFiltros()">🔄 Limpiar Filtros</button>
+            </div>
+            
+            <!-- Tabla con Datos -->
+            <div th:unless="${historial == null or historial.empty}">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Placa</th>
+                            <th>Tipo</th>
+                            <th>Plaza</th>
+                            <th>Fecha Entrada</th>
+                            <th>Hora Entrada</th>
+                            <th>Fecha Salida</th>
+                            <th>Hora Salida</th>
+                            <th>Tiempo Estacionado</th>
+                            <th>Total a Pagar</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="vehiculo : ${historial}">
+                            <td th:text="${vehiculo.id}">1</td>
+                            <td>
+                                <strong th:text="${vehiculo.placa}">ABC-1234</strong>
+                            </td>
+                            <td>
+                                <span th:text="${vehiculo.tipo}" style="text-transform: capitalize;">Carro</span>
+                            </td>
+                            <td>
+                                <span th:text="'Plaza ' + ${vehiculo.plazaAsignada}">Plaza 15</span>
+                            </td>
+                            <td>
+                                <div th:text="${#temporals.format(vehiculo.horaEntrada, 'dd/MM/yyyy')}">01/01/2024</div>
+                            </td>
+                            <td>
+                                <div th:text="${#temporals.format(vehiculo.horaEntrada, 'HH:mm')}">14:30</div>
+                            </td>
+                            <td>
+                                <div th:if="${vehiculo.horaSalida != null}" 
+                                     th:text="${#temporals.format(vehiculo.horaSalida, 'dd/MM/yyyy')}
+(Content truncated due to size limit. Use line ranges to read in chunks)

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Entrada Confirmada - Sistema de Parqueadero</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        .ticket-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .ticket {
+            border: 3px dashed #333;
+            margin: 20px;
+            background: white;
+            position: relative;
+        }
+        
+        .ticket-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .ticket-body {
+            padding: 30px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .ticket-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .ticket-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .ticket-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .qr-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .ticket-footer {
+            border-top: 2px dashed #dee2e6;
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        
+        .important-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .important-info h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+        
+        .actions-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .actions-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            min-width: 220px;
+            padding: 14px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 17px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-lg {
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+        
+        .stats-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #28a745;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .print-only {
+            display: none;
+        }
+        
+        .no-print {
+            display: block;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .print-only {
+                display: block !important;
+            }
+            
+            .container {
+                max-width: none;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .ticket-container {
+                box-shadow: none;
+                margin: 0;
+            }
+            
+            .ticket {
+                margin: 10px;
+                page-break-inside: avoid;
+            }
+            
+            body {
+                background: white;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .ticket-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .countdown {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #212529;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .countdown-time {
+            font-size: 1.5em;
+            margin-top: 5px;
+        }
+        
+        .vehicle-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #28a745;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Ticket de Entrada -->
+        <div class="ticket-container">
+            <div class="ticket">
+                <!-- Header del Ticket -->
+                <div class="ticket-header">
+                    <div class="ticket-title">COMPROBANTE DE ENTRADA</div>
+                    <div class="ticket-subtitle">Sistema de Parqueadero</div>
+                    <div class="ticket-subtitle">
+                        <span class="status-indicator"></span>
+                        Estado: Activo
+                    </div>
+                </div>
+                
+                <!-- Cuerpo del Ticket -->
+                <div class="ticket-body">
+                    <div class="ticket-info">
+                        <div class="info-item">
+                            <div class="info-label">Placa del Vehículo</div>
+                            <div class="info-value" th:text="${vehiculo.placa}">ABC-1234</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Tipo de Vehículo</div>
+                            <div class="info-value" th:text="${vehiculo.tipo}" style="text-transform: capitalize;">Carro</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Plaza Asignada</div>
+                            <div class="info-value" th:text="'Plaza ' + ${vehiculo.plazaAsignada}">Plaza 15</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Fecha y Hora de Entrada</div>
+                            <div class="info-value" th:text="${#temporals.format(vehiculo.horaEntrada, 'dd/MM/yyyy HH:mm')}">01/01/2024 14:30</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Tarifa por Hora</div>
+                            <div class="info-value" th:text="'$' + ${tarifaPorHora ?: '12.00'}">$12.00</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">Tolerancia</div>
+                            <div class="info-value" th:text="${tolerancia ?: '15 minutos'}">15 minutos</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Código QR -->
+                    <div class="qr-section">
+                        <div class="qr-code" th:attr="data-qr=${vehiculo.placa + '|' + vehiculo.id}">
+                            <!-- Aquí iría el código QR generado -->
+                            <div style="text-align: center;">
+                                <div style="font-size: 16px; margin-bottom: 10px;">📱</div>
+                                <div>Código QR</div>
+                                <div style="font-size: 10px; margin-top: 5px;" th:text="${vehiculo.placa}">ABC-1234</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #6c757d;">
+                            Escanee este código para salida rápida
+                        </div>
+                    </div>
+                    
+                    <!-- Información Importante -->
+                    <div class="important-info">
+                        <h4>📋 Información Importante</h4>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            <li>Conserve este comprobante hasta la salida</li>
+                            <li>La tarifa se calcula por hora o fracción</li>
+                            <li>Tolerancia de <span th:text="${tolerancia ?: '15 minutos'}">15 minutos</span> después de cada hora</li>
+                            <li>Horario de atención: 24 horas</li>
+                            <li>Para salida rápida, escanee el código QR</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Countdown Timer -->
+                    <div class="countdown no-print">
+                        <div>⏱️ Tiempo Transcurrido</div>
+                        <div class="countdown-time" id="tiempoTranscurrido">0h 0m</div>
+                    </div>
+                </div>
+                
+                <!-- Footer del Ticket -->
+                <div class="ticket-footer">
+                    <div style="font-size: 12px; color: #6c757d;">
+                        <div>Ticket ID: <span th:text="${vehiculo.id}">001</span></div>
+                        <div>Generado: <span th:text="${#temporals.format(vehiculo.horaEntrada, 'dd/MM/yyyy HH:mm:ss')}">01/01/2024 14:30:45</span></div>
+                        <div class="print-only">
+                            <br>
+                            <div style="border-top: 1px dashed #333; padding-top: 10px; margin-top: 10px;">
+                                Sistema de Parqueadero - Gracias por su visita
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Acciones -->
+        <div class="actions-section no-print">
+            <h3>⚡ Acciones Disponibles</h3>
+            <div class="actions-grid">
+                <button onclick="imprimirTicket()" class="btn btn-primary">
+                    🖨️ Imprimir Ticket
+                </button>
+                <a th:href="@{/dashboard}" class="btn btn-success">
+                    ⬅️ Volver al Dashboard
+                </a>
+                <button onclick="descargarPDF()" class="btn btn-secondary">
+                    📄 Descargar PDF
+                </button>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function imprimirTicket() {
+            window.print();
+        }
+        
+        function descargarPDF() {
+            // Lógica para descargar el ticket como PDF
+            alert('Funcionalidad de descarga PDF no implementada');
+        }
+        
+        // Simulación de temporizador
+        let tiempoTranscurrido = 0;
+        setInterval(() => {
+            tiempoTranscurrido++;
+            const horas = Math.floor(tiempoTranscurrido / 60);
+            const minutos = tiempoTranscurrido % 60;
+            document.getElementById('tiempoTranscurrido').innerText = `${horas}h ${minutos}m`;
+        }, 60000);
+    </script>
+</body>
+</html>

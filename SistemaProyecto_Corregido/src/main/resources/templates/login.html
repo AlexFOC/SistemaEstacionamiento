@@ -1,0 +1,128 @@
+    <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Sistema de Parqueadero</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        body {
+            background: #f4f6f8;
+            color: #222;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 60px auto 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            padding: 36px 32px 28px 32px;
+        }
+        .login-title {
+            text-align: center;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 28px;
+            color: #1976d2;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            font-weight: 500;
+            color: #1976d2;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .input-field {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #f8f9fa;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .input-field:focus {
+            border-color: #1976d2;
+            background: #f0f7ff;
+            outline: none;
+        }
+        .submit-btn {
+            background: #1976d2;
+            color: #fff;
+            padding: 14px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+        }
+        .submit-btn:hover:enabled {
+            background: #125ea2;
+        }
+        .submit-btn:disabled {
+            background: #b0b8c1;
+            color: #fff;
+            cursor: not-allowed;
+        }
+        .msg-server {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 1em;
+            text-align: center;
+        }
+        .msg-server.error {
+            color: #e74c3c;
+            background: #fdeaea;
+        }
+        .msg-server.success {
+            color: #2ecc40;
+            background: #eafaf1;
+        }
+        .links {
+            margin-top: 24px;
+            text-align: center;
+        }
+        .links a {
+            color: #1976d2;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.98em;
+            transition: color 0.2s;
+        }
+        .links a:hover {
+            color: #125ea2;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-title">Iniciar Sesión</div>
+        <div th:if="${param.error}" class="msg-server error">
+            Usuario o contraseña incorrectos.
+        </div>
+        <div th:if="${param.logout}" class="msg-server success">
+            Sesión cerrada correctamente.
+        </div>
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" name="username" class="input-field" placeholder="Ingrese su usuario" required autofocus />
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" class="input-field" placeholder="Ingrese su contraseña" required />
+            </div>
+            <button type="submit" class="submit-btn">Acceder</button>
+        </form>
+    </div>
+</body>
+</html>

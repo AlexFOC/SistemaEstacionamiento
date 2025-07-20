@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Reserva - Sistema de Parqueadero</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .form-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+        }
+        
+        .form-control.valid {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .form-control.invalid {
+            border-color: #dc3545;
+            background-color: #fff8f8;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .validation-message {
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .validation-message.success {
+            color: #28a745;
+        }
+        
+        .validation-message.error {
+            color: #dc3545;
+        }
+        
+        .plaza-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .plaza-item {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .plaza-item.disponible {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .plaza-item.ocupada {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+            cursor: not-allowed;
+        }
+        
+        .plaza-item.reservada {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+            cursor: not-allowed;
+        }
+        
+        .plaza-item.seleccionada {
+            background-color: #007bff;
+            border-color: #0056b3;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .datetime-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .info-box {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box h4 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crear Nueva Reserva</h1>
+        
+        <!-- Mensajes de éxito o error -->
+        <div th:if="${mensaje}" class="alert alert-success">
+            <p th:text="${mensaje}"></p>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <p th:text="${error}"></p>
+        </div>
+        
+        <form th:action="@{/reservas/crear}" method="post" id="reservaForm" sec:authorize="hasAnyRole('ADMIN','USER')">
+            
+            <!-- Sección: Información del Vehículo -->
+            <div class="form-section">
+                <h3>Información del Vehículo</h3>
+                
+                <div class="form-group">
+                    <label for="placaVehiculo">Placa del Vehículo:</label>
+                    <input type="text" 
+                           id="placaVehiculo" 
+                           name="placa"
+                           class="form-control"
+                           placeholder="ABC-1234" 
+                           required 
+                           maxlength="8"
+                           pattern="[A-Z]{3}-[0-9]{3,4}"
+                           title="Formato: ABC-1234"
+                           oninput="buscarVehiculo(this.value)" />
+                    <div id="mensajeVehiculo" class="validation-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoVehiculo">Tipo de Vehículo:</label>
+                    <input type="text" 
+                           id="tipoVehiculo" 
+                           name="tipoVehiculo"
+                           class="form-control"
+                           readonly 
+                           placeholder="Se completará automáticamente" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="propietario">Propietario/Cliente:</label>
+                    <input type="text" 
+                           id="propietario" 
+                           name="propietario"
+                           class="form-control"
+                           placeholder="Nombre del propietario (opcional)" />
+                </div>
+            </div>
+            
+            <!-- Sección: Período de Reserva -->
+            <div class="form-section">
+                <h3>Período de Reserva</h3>
+                
+                <div class="datetime-group">
+                    <div class="form-group">
+                        <label for="fechaInicio">Fecha y Hora de Inicio:</label>
+                        <input type="datetime-local" 
+                               id="fechaInicio" 
+                               name="fechaInicio"
+                               class="form-control"
+                               required 
+                               onchange="validarFechas()" />
+                        <div id="mensajeFechaInicio" class="validation-message"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fechaFin">Fecha y Hora de Fin:</label>
+                        <input type="datetime-local" 
+                               id="fechaFin" 
+                               name="fechaFin"
+                               class="form-control"
+                               required 
+                               onchange="validarFechas()" />
+                        <div id="mensajeFechaFin" class="validation-message"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoReserva">Tipo de Reserva:</label>
+                    <select id="tipoReserva" name="tipoReserva" class="form-control" required onchange="manejarTipoReserva()">
+                        <option value="">Seleccione un tipo</option>
+                        <option value="puntual">Reserva Puntual</option>
+                        <option value="diaria">Reserva Diaria</option>
+                        <option value="semanal">Reserva Semanal</option>
+                        <option value="mensual">Reserva Mensual</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Sección: Selección de Plaza -->
+            <div class="form-section">
+                <h3>Selección de Plaza</h3>
+                
+                <div class="info-box">
+                    <h4>Leyenda:</h4>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div class="plaza-item disponible" style="width: 20px; height: 20px; font-size: 10px;">✓</div>
+                            <span>Disponible</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div class="plaza-item ocupada" style="width: 20px; height: 20px; font-size: 10px;">✗</div>
+                            <span>Ocupada</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div class="plaza-item reservada" style="width: 20px; height: 20px; font-size: 10px;">R</div>
+                            <span>Reservada</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div class="plaza-item seleccionada" style="width: 20px; height: 20px; font-size: 10px;">S</div>
+                            <span>Seleccionada</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Plazas Disponibles:</label>
+                    <button type="button" class="btn btn-secondary" onclick="actualizarPlazas()" style="margin-left: 10px;">
+                        Actualizar Disponibilidad
+                    </button>
+                    <div id="plazasGrid" class="plaza-grid">
+                        <!-- Las plazas se cargarán dinámicamente -->
+                    </div>
+                    <input type="hidden" id="plazaSeleccionada" name="plazaId" required />
+                    <div id="mensajePlaza" class="validation-message"></div>
+                </div>
+            </div>
+            
+            <!-- Sección: Resumen y Confirmación -->
+            <div class="form-section">
+                <h3>Resumen de la Reserva</h3>
+                <div id="resumenReserva" class="info-box">
+                    <p><strong>Vehículo:</strong> <span id="resumenPlaca">-</span></p>
+                    <p><strong>Plaza:</strong> <span id="resumenPlaza">-</span></p>
+                    <p><strong>Período:</strong> <span id="resumenPeriodo">-</span></p>
+                    <p><strong>Duración:</strong> <span id="resumenDuracion">-</span></p>
+                    <p><strong>Costo Estimado:</strong> <span id="resumenCosto">-</span></p>
+                </div>
+            </div>
+            
+            <!-- Botones de Acción -->
+            <div style="text-align: center; margin-top: 30px;">
+                <button type="submit" id="btnCrearReserva" class="btn btn-primary" disabled>
+                    Crear Reserva
+                </button>
+                <a th:href="@{/reservas/gestionar}" class="btn btn-secondary" style="margin-left: 15px;">
+                    Cancelar
+                </a>
+            </div>
+
+        </form>
+
+        <!-- Solo lectura para invitados -->
+        <form th:action="@{/reservas/crear}" method="post" id="reservaFormGuest" sec:authorize="hasRole('GUEST')" style="pointer-events:none;opacity:0.7;">
+            <!-- Sección: Información del Vehículo -->
+            <div class="form-section">
+                <h3>Información del Vehículo</h3>
+                <div class="form-group">
+                    <label for="placaVehiculo">Placa del Vehículo:</label>
+                    <input type="text" id="placaVehiculo" name="placa" class="form-control" placeholder="ABC-1234" required maxlength="8" pattern="[A-Z]{3}-[0-9]{3,4}" title="Formato: ABC-1234" readonly />
+                </div>
+                <div class="form-group">
+                    <label for="tipoVehiculo">Tipo de Vehículo:</label>
+                    <input type="text" id="tipoVehiculo" name="tipoVehiculo" class="form-control" readonly placeholder="Se completará automáticamente" />
+                </div>
+                <div class="form-group">
+                    <label for="propietario">Propietario/Cliente:</label>
+                    <input type="text" id="propietario" name="propietario" class="form-control" placeholder="Nombre del propietario (opcional)" readonly />
+                </div>
+            </div>
+            <!-- Sección: Período de Reserva -->
+            <div class="form-section">
+                <h3>Período de Reserva</h3>
+                <div class="datetime-group">
+                    <div class="form-group">
+                        <label for="fechaInicio">Fecha y Hora de Inicio:</label>
+                        <input type="datetime-local" id="fechaInicio" name="fechaInicio" class="form-control" required readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="fechaFin">Fecha y Hora de Fin:</label>
+                        <input type="datetime-local" id="fechaFin" name="fechaFin" class="form-control" required readonly />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tipoReserva">Tipo de Reserva:</label>
+                    <select id="tipoReserva" name="tipoReserva" class="form-control" required disabled>
+                        <option value="">Seleccione un tipo</option>
+                        <option value="puntual">Reserva Puntual</option>
+                        <option value="diaria">Reserva Diaria</option>
+                        <option value="semanal">Reserva Semanal</option>
+                        <option value="mensual">Reserva Mensual</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Sección: Selección de Plaza -->
+            <div class="form-section">
+                <h3>Selección de Plaza</h3>
+                <div class="info-box">
+                    <h4>Leyenda:</h4>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div class="plaza-item disponible" style="width: 20px; height: 20px; font-size: 10px;">✓</div>
+                            <span>Disponible</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div class="plaza-item ocupada" style="width: 20px; height: 20px; font-size: 10px;">✗</div>
+                            <span>Ocupada</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div class="plaza-item reservada" style="width: 20px; height: 20px; font-size: 10px;">R</div>
+                            <span>Reservada</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div class="plaza-item seleccionada" style="width: 20px; height: 20px; font-size: 10px;">S</div>
+                            <span>Seleccionada</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Plazas Disponibles:</label>
+                    <button type="button" class="btn btn-secondary" style="margin-left: 10px;" disabled>
+                        Actualizar Disponibilidad
+                    </button>
+                    <div id="plazasGridGuest" class="plaza-grid">
+                        <!-- Las plazas se cargarán dinámicamente solo para mostrar -->
+                    </div>
+                    <input type="hidden" id="plazaSeleccionadaGuest" name="plazaId" required />
+                </div>
+            </div>
+            <!-- Sección: Resumen y Confirmación -->
+            <div class="form-section">
+                <h3>Resumen de la Reserva</h3>
+                <div id="resumenReservaGuest" class="info-box">
+                    <p><strong>Vehículo:</strong> <span id="resumenPlacaGuest">-</span></p>
+                    <p><strong>Plaza:</strong> <span id="resumenPlazaGuest">-</span></p>
+                    <p><strong>Período:</strong> <span id="resumenPeriodoGuest">-</span></p>
+                    <p><strong>Duración:</strong> <span id="resumenDuracionGuest">-</span></p>
+                    <p><strong>Costo Estimado:</strong> <span id="resumenCostoGuest">-</span></p>
+                </div>
+            </div>
+            <!-- Botones de Acción solo lectura -->
+            <div style="text-align: center; margin-top: 30px;">
+                <button type="button" class="btn btn-primary" disabled>
+                    Crear Reserva (Solo lectura)
+                </button>
+                <a th:href="@{/reservas/gestionar}" class="btn btn-secondary" style="margin-left: 15px; pointer-events:auto;">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+        </form>
+        
+        <!-- Loading overlay -->
+        <div id="loadingOverlay" class="loading">
+            <div class="spinner"></div>
+            <p>Procesando reserva...</p>
+        </div>
+    </div>
+
+    <script>
+        let vehiculoValido = false;
+        let fechasValidas = false;
+        let plazaSeleccionadaId = null;
+        let plazasDisponibles = [];
+
+        // Inicializar fechas mínimas
+        document.addEventListener('DOMContentLoaded', function() {
+            const ahora = new Date();
+            const fechaMinima = new Date(ahora.getTime() + (30 * 60000)); // 30 minutos desde ahora
+            
+            document.getElementById('fechaInicio').min = fechaMinima.toISOString().slice(0, 16);
+            document.getElementById('fechaFin').min = fechaMinima.toISOString().slice(0, 16);
+            
+            cargarPlazas();
+        });
+
+        // Buscar vehículo por placa
+        function buscarVehiculo(placa) {
+            const mensaje = document.getElementById('mensajeVehiculo');
+            const tipoInput = document.getElementById('tipoVehiculo');
+            
+            vehiculoValido = false;
+            actualizarBotonCrear();
+            
+            if (placa.length < 7) {
+                mensaje.innerHTML = '';
+                tipoInput.value = '';
+                return;
+            }
+            
+            // Convertir a mayúsculas
+            document.getElementById('placaVehiculo').value = placa.toUpperCase();
+            
+            fetch('/vehiculos/buscar-por-placa', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'placa=' + encodeURIComponent(placa)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.encontrado) {
+                    mensaje.innerHTML = '✅ Vehículo encontrado';
+                    mensaje.className = 'validation-message success';
+                    tipoInput.value = data.tipo;
+                    vehiculoValido = true;
+                } else {
+                    mensaje.innerHTML = '⚠️ Vehículo no registrado. Se creará automáticamente.';
+                    mensaje.className = 'validation-message error';
+                    tipoInput.value = '';
+                    vehiculoValido = true; // Permitir crear vehículo nuevo
+                }
+                actualizarBotonCrear();
+                actualizarResumen();
+            })
+            .catch(error => {
+                mensaje.innerHTML = '❌ Error al buscar vehículo';
+                mensaje.className = 'validation-message error';
+                vehiculoValido = false;
+                actualizarBotonCrear();
+            });
+        }
+
+        // Validar fechas
+        function validarFechas() {
+            const fechaInicio = new Date(document.getElementById('fechaInicio').value);
+            const fechaFin = new Date(doc
+(Content truncated due to size limit. Use line ranges to read in chunks)

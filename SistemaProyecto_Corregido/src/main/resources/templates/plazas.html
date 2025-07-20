@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Plazas - Sistema de Parqueadero</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Estilos para el mapa de plazas dinámico */
+        .plaza-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+
+        .plaza-item {
+            width: 60px;
+            height: 60px;
+            background-color: #f8f9fa;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .plaza-item.libre {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .plaza-item.ocupada {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .plaza-item.reservada {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
+        }
+
+        .plaza-item.mantenimiento {
+            background-color: #fff3cd;
+            color: #856404;
+            border-color: #ffeeba;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .controls-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #007bff;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .stats-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .stat-ocupadas .stat-number {
+            color: #dc3545;
+        }
+        
+        .stat-libres .stat-number {
+            color: #28a745;
+        }
+        
+        .stat-reservadas .stat-number {
+            color: #ffc107;
+        }
+        
+        .stat-mantenimiento .stat-number {
+            color: #6c757d;
+        }
+        
+        .legend-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 2px solid #333;
+        }
+        
+        .plazas-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .plazas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .view-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .contenedor-bloques {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .bloque {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .bloque-title {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .bloque-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 90px);
+            grid-template-rows: repeat(3, 90px);
+            gap: 16px;
+        }
+        
+        .plaza {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px;
+            border: 2px solid #333;
+            width: 90px;
+            height: 90px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-clip: padding-box;
+            box-sizing: border-box;
+        }
+        
+        .plaza:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .plaza-numero {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .plaza-estado {
+            font-size: 20px;
+            margin-top: 2px;
+        }
+        
+        .plaza-info {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            right: 2px;
+            font-size: 8px;
+            text-align: center;
+            opacity: 0.8;
+        }
+        
+        .libre {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .ocupada {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .reservada {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        
+        .mantenimiento {
+            background-color: #e2e3e5;
+            border-color: #6c757d;
+            color: #383d41;
+        }
+        
+        .fuera-servicio {
+            background-color: #f1f3f4;
+            border-color: #adb5bd;
+            color: #6c757d;
+            opacity: 0.6;
+        }
+        
+        .plaza-seleccionada {
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
+        
+        .actions-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .contenedor-bloques {
+                gap: 15px;
+            }
+            
+            .bloque-grid {
+                grid-template-columns: repeat(3, 60px);
+                grid-template-rows: repeat(3, 60px);
+            }
+            
+            .plaza {
+                width: 60px;
+                height: 60px;
+                font-size: 12px;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🅿️ Gestión de Plazas de Estacionamiento</h1>
+            <p>Administre el estado y disponibilidad de todas las plazas del parqueadero</p>
+        </div>
+        
+        <!-- Mensajes -->
+        <div th:if="${mensaje}" class="alert alert-success">
+            <p th:text="${mensaje}"></p>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <p th:text="${error}"></p>
+        </div>
+             
+        <!-- Estadísticas -->
+        <div class="stats-section">
+            <h3>📊 Estado Actual de las Plazas</h3>
+            <div class="stats-grid">
+                <div class="stat-card stat-libres">
+                    <div class="stat-number" th:text="${plazasLibres ?: 0}">0</div>
+                    <div class="stat-label">Plazas Libres</div>
+                </div>
+                
+                <div class="stat-card stat-ocupadas">
+                    <div class="stat-number" th:text="${plazasOcupadas ?: 0}">0</div>
+                    <div class="stat-label">Plazas Ocupadas</div>
+                </div>
+                
+                <div class="stat-card stat-reservadas">
+                    <div class="stat-number" th:text="${plazasReservadas ?: 0}">0</div>
+                    <div class="stat-label">Plazas Reservadas</div>
+                </div>
+                
+                <div class="stat-card stat-mantenimiento">
+                    <div class="stat-number" th:text="${plazasMantenimiento ?: 0}">0</div>
+                    <div class="stat-label">En Mantenimiento</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${totalPlazas ?: 0}">0</div>
+                    <div class="stat-label">Total de Plazas</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${porcentajeOcupacion ?: 0}">0%</div>
+                    <div class="stat-label">Ocupación</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leyenda -->
+        <div class="legend-section">
+            <h3>🏷️ Leyenda de Estados</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color libre"></div>
+                    <div>
+                        <strong>Libre (✅)</strong><br>
+                        <small>Plaza disponible para uso</small>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color ocupada"></div>
+                    <div>
+                        <strong>Ocupada (🚗)</strong><br>
+                        <small>Plaza con vehículo estacionado</small>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color reservada"></div>
+                    <div>
+                        <strong>Reservada (📅)</strong><br>
+                        <small>Plaza reservada para cliente</small>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color mantenimiento"></div>
+                    <div>
+                        <strong>Mantenimiento (🔧)</strong><br>
+                        <small>Plaza en mantenimiento</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mapa de Plazas (dinámico) -->
+        <!-- Mapa de Plazas (dinámico, corregido) -->
+        <div class="plazas-section">
+            <div class="plazas-header">
+                <h3>🗺️ Mapa de Plazas</h3>
+            </div>
+            <div id="plazasGrid" class="contenedor-bloques">
+                <!-- Las plazas se cargarán dinámicamente -->
+            </div>
+        </div>
+
+        <script>
+            const estadoIcono = {
+                "libre": "✅",
+                "ocupada": "🚗",
+                "reservada": "📅",
+                "mantenimiento": "🔧"
+            };
+
+            const estadoClase = {
+                "libre": "libre",
+                "ocupada": "ocupada",
+                "reservada": "reservada",
+                "mantenimiento": "mantenimiento"
+            };
+
+            function cargarPlazas() {
+                fetch('/plazas/api/listar')
+                    .then(r => r.json())
+                    .then(plazas => {
+                        const contenedor = document.getElementById('plazasGrid');
+                        contenedor.innerHTML = '';
+
+                        // Agrupar en bloques de 9 plazas
+                        for (let i = 0; i < plazas.length; i += 9) {
+                            const bloque = plazas.slice(i, i + 9);
+                            const bloqueDiv = document.createElement('div');
+                            bloqueDiv.className = 'bloque';
+                            bloqueDiv.innerHTML = `<div class="bloque-title">Bloque ${Math.floor(i / 9) + 1}</div>`;
+
+                            const grid = document.createElement('div');
+                            grid.className = 'bloque-grid';
+
+                            bloque.forEach(plaza => {
+                                const div = document.createElement('div');
+                                div.className = `plaza ${estadoClase[plaza.estado]}`;
+                                div.innerHTML = `
+                                    <div class="plaza-numero">${plaza.id}</div>
+                                    <div class="plaza-estado">${estadoIcono[plaza.estado]}</div>
+                                `;
+
+                                // Solo ADMIN y USER pueden cambiar estado
+                                const puedeEditar = /*[[${#authorization.expression('hasAnyRole(\'ADMIN\',\'USER\'))}]]*/ false;
+                                if (puedeEditar) {
+                                    div.title = 'Cambiar estado';
+                                    div.style.cursor = 'pointer';
+                                    div.onclick = function() {
+                                        fetch('/plazas/api/cambiar?id=' + plaza.id, { method: 'POST' })
+                                            .then(() => cargarPlazas());
+                                    };
+                                    div.style.opacity = '1';
+                                } else {
+                                    div.style.cursor = 'not-allowed';
+                                    div.title = 'Solo lectura';
+                                    div.style.opacity = '0.7';
+                                }
+                                grid.appendChild(div);
+                            });
+
+                            bloqueDiv.appendChild(grid);
+                            contenedor.appendChild(bloqueDiv);
+                        }
+                    })
+                    .catch(err => console.error('Error al cargar plazas:', err));
+            }
+
+            // Cargar al iniciar la página
+            document.addEventListener('DOMContentLoaded', cargarPlazas);
+        </script>
+</body>
+</html>
+

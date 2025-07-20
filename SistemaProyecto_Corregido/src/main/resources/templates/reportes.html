@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reportes - Sistema de Parqueadero</title>
+    <style>
+        /* --- MODERNIZACIÓN Y FLAT DESIGN --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            color: #222;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 16px 32px 16px;
+        }
+        .header {
+            background: #fff;
+            color: #222;
+            padding: 32px 24px 24px 24px;
+            border-radius: 14px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: #6c757d;
+            font-size: 1.1em;
+        }
+        .stats-section, .report-details, .custom-reports, .table-section, .reports-section {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            padding: 28px 22px;
+            margin-bottom: 28px;
+        }
+        .stats-grid, .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 22px 12px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #1976d2;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+        }
+        .stat-number {
+            font-size: 2.1em;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 6px;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 1em;
+        }
+        .reports-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .report-card {
+            background: #f4f6f8;
+            padding: 22px 16px 18px 16px;
+            border-radius: 10px;
+            border: 1px solid #e0e3e7;
+            transition: box-shadow 0.2s, transform 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .report-card:hover {
+            box-shadow: 0 4px 16px rgba(25, 118, 210, 0.08);
+            transform: translateY(-2px) scale(1.02);
+        }
+        .report-icon {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            color: #1976d2;
+        }
+        .report-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 1.1em;
+            color: #222;
+        }
+        .report-description {
+            color: #6c757d;
+            margin-bottom: 14px;
+            text-align: center;
+            font-size: 0.97em;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 18px;
+            border-radius: 6px;
+            border: none;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            box-shadow: none;
+            outline: none;
+            background: #e3e7ed;
+            color: #222;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background: #d1d9e6;
+            color: #1976d2;
+        }
+        .btn-success {
+            background: #2ecc40;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #27ae38;
+            color: #fff;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #222;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+            color: #222;
+        }
+        .btn-info {
+            background: #1976d2;
+            color: #fff;
+        }
+        .btn-info:hover {
+            background: #125ea2;
+            color: #fff;
+        }
+        .btn-secondary {
+            background: #ececec;
+            color: #444;
+        }
+        .btn-secondary:hover {
+            background: #d1d9e6;
+            color: #1976d2;
+        }
+        .navigation {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .badge-info {
+            background: #1976d2;
+            color: #fff;
+        }
+        .badge-success {
+            background: #2ecc40;
+            color: #fff;
+        }
+        .form-control {
+            border: 1.5px solid #e0e0e0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+            padding: 7px 10px;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .no-data {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px;
+            font-style: italic;
+        }
+        @media (max-width: 700px) {
+            .stats-grid, .reports-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 th:if="${tipoReporte}">📊 Reporte <span th:text="${tipoReporte}">Diario</span></h1>
+            <div th:unless="${tipoReporte}" style="display: flex; justify-content: center; align-items: center; gap: 18px;">
+                <h1 style="margin-bottom: 0;">📊 Centro de Reportes</h1>
+                <a th:href="@{/dashboard}" class="btn btn-light" style="min-width: 120px; font-size: 14px; color: #1976d2; border: 2px solid #1976d2; font-weight: bold; text-decoration: none; margin-left: 40px;">⬅️ Volver al Dashboard</a>
+            </div>
+            <p th:if="${tipoReporte}">Período: <span th:text="${fechaInicio}"></span> - <span th:text="${fechaFin}"></span></p>
+            <p th:unless="${tipoReporte}">Análisis y estadísticas del sistema de parqueadero</p>
+        </div>
+        
+        <!-- Mostrar detalles del reporte si existe -->
+        <div th:if="${tipoReporte}" class="report-details">
+            <h3>Resumen del Reporte <span th:text="${tipoReporte}">Diario</span></h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${totalEntradas}">0</div>
+                    <div class="stat-label">Total de Entradas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${totalSalidas}">0</div>
+                    <div class="stat-label">Total de Salidas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$<span th:text="${montoTotal}">0.00</span></div>
+                    <div class="stat-label">Monto Total Cobrado</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${tiempoTotal}">0 minutos</div>
+                    <div class="stat-label">Tiempo Total de Estacionamiento</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabla de detalles de vehículos -->
+        <div th:if="${vehiculosDetalle != null and !vehiculosDetalle.empty}" class="table-section">
+            <h3>🚗 Detalle de Vehículos</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Placa</th>
+                        <th>Tipo</th>
+                        <th>Hora Entrada</th>
+                        <th>Hora Salida</th>
+                        <th class="text-right">Tiempo Estacionado</th>
+                        <th class="text-right">Monto Pagado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="vehiculo : ${vehiculosDetalle}">
+                        <td>
+                            <strong th:text="${vehiculo.placa}">ABC-123</strong>
+                        </td>
+                        <td>
+                            <span class="badge badge-info" th:text="${vehiculo.tipo}">Automóvil</span>
+                        </td>
+                        <td th:text="${#temporals.format(vehiculo.horaEntrada, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</td>
+                        <td th:text="${#temporals.format(vehiculo.horaSalida, 'dd/MM/yyyy HH:mm')}">01/01/2024 12:00</td>
+                        <td class="text-right">
+                            <span th:text="${T(java.time.Duration).between(vehiculo.horaEntrada, vehiculo.horaSalida).toMinutes() + ' min'}">120 min</span>
+                        </td>
+                        <td class="text-right">
+                            <strong>$<span th:text="${#numbers.formatDecimal(vehiculo.totalPagar ?: 0, 1, 2)}">0.00</span></strong>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Mensaje cuando no hay datos -->
+        <div th:if="${tipoReporte != null and (vehiculosDetalle == null or vehiculosDetalle.empty)}" class="table-section">
+            <div class="no-data">
+                <h4>📭 No hay datos disponibles</h4>
+                <p>No se encontraron vehículos para el período seleccionado.</p>
+            </div>
+        </div>
+        
+        <!-- Estadísticas del día (solo si no es un reporte específico) -->
+        <div th:unless="${tipoReporte}" class="stats-section">
+            <h3>📈 Resumen del Día - <span th:text="${fechaHoy}"></span></h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${vehiculosHoy}">0</div>
+                    <div class="stat-label">Vehículos Atendidos Hoy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$<span th:text="${#numbers.formatDecimal(ingresosHoy, 1, 2)}">0.00</span></div>
+                    <div class="stat-label">Ingresos de Hoy</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reportes Rápidos (solo si no es un reporte específico) -->
+        <div th:unless="${tipoReporte}" class="reports-section">
+            <h3>⚡ Reportes Rápidos</h3>    
+            <div class="reports-grid">
+                <!-- ADMIN y USER -->
+                <div class="report-card" sec:authorize="hasAnyRole('ADMIN','USER')">
+                    <div class="report-icon">📅</div>
+                    <div class="report-title">Reporte Diario</div>
+                    <div class="report-description">Actividad y ingresos del día actual</div>
+                    <a th:href="@{/reportes/diario}" class="btn btn-success">Ver Reporte Diario</a>
+                </div>
+                <div class="report-card" sec:authorize="hasAnyRole('ADMIN','USER')">
+                    <div class="report-icon">📈</div>
+                    <div class="report-title">Reporte Semanal</div>
+                    <div class="report-description">Resumen de los últimos 7 días</div>
+                    <a th:href="@{/reportes/semanal}" class="btn btn-warning">Ver Reporte Semanal</a>
+                </div>
+                <div class="report-card" sec:authorize="hasAnyRole('ADMIN','USER')">
+                    <div class="report-icon">📊</div>
+                    <div class="report-title">Reporte Mensual</div>
+                    <div class="report-description">Estadísticas del mes actual</div>
+                    <a th:href="@{/reportes/mensual}" class="btn btn-info">Ver Reporte Mensual</a>
+                </div>
+                <!-- GUEST solo lectura -->
+                <div class="report-card" sec:authorize="hasRole('GUEST')">
+                    <div class="report-icon">📅</div>
+                    <div class="report-title">Reporte Diario</div>
+                    <div class="report-description">Actividad y ingresos del día actual</div>
+                    <a class="btn btn-secondary" style="pointer-events:none;opacity:0.6;">Ver Reporte Diario (Solo lectura)</a>
+                </div>
+                <div class="report-card" sec:authorize="hasRole('GUEST')">
+                    <div class="report-icon">📈</div>
+                    <div class="report-title">Reporte Semanal</div>
+                    <div class="report-description">Resumen de los últimos 7 días</div>
+                    <a class="btn btn-secondary" style="pointer-events:none;opacity:0.6;">Ver Reporte Semanal (Solo lectura)</a>
+                </div>
+                <div class="report-card" sec:authorize="hasRole('GUEST')">
+                    <div class="report-icon">📊</div>
+                    <div class="report-title">Reporte Mensual</div>
+                    <div class="report-description">Estadísticas del mes actual</div>
+                    <a class="btn btn-secondary" style="pointer-events:none;opacity:0.6;">Ver Reporte Mensual (Solo lectura)</a>
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- Reportes Personalizados -->
+        <div class="custom-reports">
+            <h3>🎯 Reportes Personalizados</h3>
+            <p style="margin-bottom: 20px; color: #6c757d;">Genere reportes para períodos específicos</p>
+            
+            <form th:action="@{/reporte/txt}" method="get">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="desde">Fecha Desde:</label>
+                        <input type="date" id="desde" name="desde" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hasta">Fecha Hasta:</label>
+                        <input type="date" id="hasta" name="hasta" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-secondary">📄 Descargar TXT</button>
+                    </div>
+                </div>
+            </form>
+            
+            <form th:action="@{/reporte/excel}" method="get" style="margin-top: 15px;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="desde2">Fecha Desde:</label>
+                        <input type="date" id="desde2" name="desde" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hasta2">Fecha Hasta:</label>
+                        <input type="date" id="hasta2" name="hasta" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">📊 Descargar Excel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Navegación -->
+        <div class="navigation">
+            <a th:href="@{/dashboard}" class="btn btn-secondary">🏠 Volver al Dashboard</a>
+            <a th:if="${tipoReporte}" th:href="@{/reportes}" class="btn" style="margin-left: 10px;">📊 Ver Todos los Reportes</a>
+        </div>
+        <!-- Elimino la navegación inferior -->
+    </div>
+    
+    <script>
+        // Establecer fechas por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+            
+            const desdeInput = document.getElementById('desde');
+            const hastaInput = document.getElementById('hasta');
+            const desde2Input = document.getElementById('desde2');
+            const hasta2Input = document.getElementById('hasta2');
+            
+            if (desdeInput) desdeInput.value = inicioMes;
+            if (hastaInput) hastaInput.value = hoy;
+            if (desde2Input) desde2Input.value = inicioMes;
+            if (hasta2Input) hasta2Input.value = hoy;
+        });
+    </script>
+</body>
+</html>

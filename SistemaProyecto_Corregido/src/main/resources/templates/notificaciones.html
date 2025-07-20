@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuración de Notificaciones - Sistema de Parqueadero</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .config-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #007bff;
+        }
+        
+        .config-section h3 {
+            margin-top: 0;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+        }
+        
+        .form-control-inline {
+            display: inline-block;
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-group .form-control {
+            flex: 1;
+        }
+        
+        .input-addon {
+            background-color: #e9ecef;
+            border: 2px solid #ddd;
+            border-left: none;
+            padding: 12px;
+            border-radius: 0 5px 5px 0;
+            color: #495057;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .checkbox-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .help-text {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .preview-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .preview-notification {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 10px;
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .notification-message {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .actions-section {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .actions-section .btn {
+            margin: 0 10px;
+        }
+        
+        .test-section {
+            background-color: #e7f3ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border: 1px solid #b3d9ff;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-active {
+            background-color: #28a745;
+        }
+        
+        .status-inactive {
+            background-color: #dc3545;
+        }
+        
+        .status-warning {
+            background-color: #ffc107;
+        }
+        
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .input-addon {
+                border-left: 2px solid #ddd;
+                border-radius: 5px;
+            }
+            
+            .actions-section .btn {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔔 Configuración de Notificaciones</h1>
+            <p>Configure las alertas y notificaciones del sistema de parqueadero</p>
+        </div>
+        
+        <!-- Mensajes -->
+        <div th:if="${mensaje}" class="alert alert-success">
+            <p th:text="${mensaje}"></p>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <p th:text="${error}"></p>
+        </div>
+        
+        <form th:action="@{/configuracion/notificaciones}" method="post" th:object="${configuracion}">
+            
+            <!-- Configuración de Tiempo Excesivo -->
+            <div class="config-section">
+                <h3>⏰ Notificaciones por Tiempo Excesivo</h3>
+                
+                <div class="form-group">
+                    <label for="umbralTiempoExcesivo">Umbral de Tiempo Excesivo:</label>
+                    <div class="input-group">
+                        <input type="number" 
+                               id="umbralTiempoExcesivo" 
+                               th:field="*{umbralTiempoExcesivoHoras}"
+                               class="form-control"
+                               min="1" 
+                               max="168" 
+                               required 
+                               onchange="actualizarPreview()" />
+                        <span class="input-addon">horas</span>
+                    </div>
+                    <div class="help-text">
+                        Tiempo máximo permitido antes de generar una alerta (1-168 horas)
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="frecuenciaVerificacion">Frecuencia de Verificación:</label>
+                    <select id="frecuenciaVerificacion" 
+                            th:field="*{frecuenciaVerificacionMinutos}"
+                            class="form-control"
+                            onchange="actualizarPreview()">
+                        <option value="15">Cada 15 minutos</option>
+                        <option value="30">Cada 30 minutos</option>
+                        <option value="60">Cada hora</option>
+                        <option value="120">Cada 2 horas</option>
+                        <option value="360">Cada 6 horas</option>
+                    </select>
+                    <div class="help-text">
+                        Con qué frecuencia el sistema verificará vehículos con tiempo excesivo
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tipos de Notificación:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" 
+                                   id="notifDashboard" 
+                                   th:field="*{notificarEnDashboard}"
+                                   onchange="actualizarPreview()" />
+                            <label for="notifDashboard">
+                                <span class="status-indicator status-active"></span>
+                                Mostrar en Dashboard
+                            </label>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" 
+                                   id="notifEmail" 
+                                   th:field="*{notificarPorEmail}"
+                                   onchange="actualizarPreview()" />
+                            <label for="notifEmail">
+                                <span class="status-indicator status-warning"></span>
+                                Enviar por Email
+                            </label>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" 
+                                   id="notifLog" 
+                                   th:field="*{registrarEnLog}"
+                                   onchange="actualizarPreview()" />
+                            <label for="notifLog">
+                                <span class="status-indicator status-active"></span>
+                                Registrar en Log del Sistema
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configuración de Reservas -->
+            <div class="config-section">
+                <h3>📅 Notificaciones de Reservas</h3>
+                
+                <div class="form-group">
+                    <label for="alertaReservaProxima">Alerta de Reserva Próxima a Vencer:</label>
+                    <div class="input-group">
+                        <input type="number" 
+                               id="alertaReservaProxima" 
+                               th:field="*{alertaReservaProximaMinutos}"
+                               class="form-control"
+                               min="5" 
+                               max="1440" 
+                               required 
+                               onchange="actualizarPreview()" />
+                        <span class="input-addon">minutos antes</span>
+                    </div>
+                    <div class="help-text">
+                        Tiempo de anticipación para alertar sobre reservas que están por vencer
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="alertaReservaVencida">Alerta de Reserva Vencida:</label>
+                    <div class="input-group">
+                        <input type="number" 
+                               id="alertaReservaVencida" 
+                               th:field="*{alertaReservaVencidaMinutos}"
+                               class="form-control"
+                               min="1" 
+                               max="1440" 
+                               required 
+                               onchange="actualizarPreview()" />
+                        <span class="input-addon">minutos después</span>
+                    </div>
+                    <div class="help-text">
+                        Tiempo después del vencimiento para alertar sobre reservas no finalizadas
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Notificaciones de Reservas:</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" 
+                                   id="notifReservaCreada" 
+                                   th:field="*{notificarReservaCreada}"
+                                   onchange="actualizarPreview()" />
+                            <label for="notifReservaCreada">
+                                Notificar cuando se crea una reserva
+                            </label>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" 
+                                   id="notifReservaCancelada" 
+                                   th:field="*{notificarReservaCancelada}"
+                                   onchange="actualizarPreview()" />
+                            <label for="notifReservaCancelada">
+                                Notificar cuando se cancela una reserva
+                            </label>
+                        </div>
+                        
+                        <div class="checkbox-item">
+                            <input type="checkbox" 
+                                   id="notifReservaProxima" 
+                                   th:field="*{notificarReservaProxima}"
+                                   onchange="actualizarPreview()" />
+                            <label for="notifReservaProxima">
+                                Notificar reservas próximas a vencer
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configuración de Email -->
+            <div class="config-section">
+                <h3>📧 Configuración de Email</h3>
+                
+                <div class="form-group">
+                    <label for="emailDestinatario">Email del Administrador:</label>
+                    <input type="email" 
+                           id="emailDestinatario" 
+                           th:field="*{emailAdministrador}"
+                           class="form-control"
+                           placeholder="adm
+(Content truncated due to size limit. Use line ranges to read in chunks)

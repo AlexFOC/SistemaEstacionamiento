@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Salida - Sistema de Parqueadero</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        body {
+            background: #f4f6f8;
+            color: #222;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container-form {
+            max-width: 420px;
+            margin: 40px auto 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            padding: 36px 32px 28px 32px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 28px;
+            color: #1976d2;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            font-weight: 500;
+            color: #1976d2;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .input-field {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #f8f9fa;
+            text-transform: uppercase;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 5px rgba(25, 118, 210, 0.13);
+        }
+        .btn {
+            background: #1976d2;
+            color: #fff;
+            padding: 14px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+        }
+        .btn:hover:enabled {
+            background: #125ea2;
+        }
+        .btn:disabled {
+            background: #b0b8c1;
+            color: #fff;
+            cursor: not-allowed;
+        }
+        .msg-server {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 1em;
+            text-align: center;
+        }
+        .msg-server.success {
+            color: #2ecc40;
+            background: #eafaf1;
+        }
+        .msg-server.error {
+            color: #e74c3c;
+            background: #fdeaea;
+        }
+        .links {
+            margin-top: 24px;
+            text-align: center;
+        }
+        .links a {
+            color: #1976d2;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.98em;
+            transition: color 0.2s;
+        }
+        .links a:hover {
+            color: #125ea2;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-form">
+        <h1>Registrar Salida de Vehículo</h1>
+        <!-- Mensajes de éxito o error del servidor -->
+        <div th:if="${mensaje}" class="msg-server success">
+            <p th:text="${mensaje}"></p>
+        </div>
+        <div th:if="${error}" class="msg-server error">
+            <p th:text="${error}"></p>
+        </div>
+        <form th:action="@{/vehiculos/registrar-salida}" method="post" id="formBuscarVehiculo">
+            <div class="form-group">
+                <label for="placa">Placa del Vehículo:</label>
+                <input type="text" 
+                       id="placa" 
+                       name="placa" 
+                       class="input-field"
+                       th:value="${placa}"
+                       placeholder="ABC-1234"
+                       required 
+                       style="text-transform: uppercase;" />
+            </div>
+            <button type="submit" class="btn">Registrar Salida</button>
+        </form>
+        <div class="links">
+            <a th:href="@{/vehiculos/formulario-entrada}">Ir a Entrada</a>
+            <a th:href="@{/vehiculos/historial}">Ver Historial</a>
+            <a th:href="@{/dashboard}">Volver al Dashboard</a>
+        </div>

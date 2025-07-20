@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Entrada Vehículo</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <style>
+        body {
+            background: #f4f6f8;
+            color: #222;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container-form {
+            max-width: 420px;
+            margin: 40px auto 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            padding: 36px 32px 28px 32px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 28px;
+            color: #1976d2;
+        }
+        .validation-container {
+            position: relative;
+            margin-bottom: 18px;
+        }
+        label {
+            font-weight: 500;
+            color: #1976d2;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .input-field {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #f8f9fa;
+            text-transform: uppercase;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .input-field.valid {
+            border-color: #2ecc40;
+            background-color: #f8fff9;
+        }
+        .input-field.invalid {
+            border-color: #e74c3c;
+            background-color: #fff8f8;
+        }
+        .validation-message {
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: 500;
+            min-height: 18px;
+        }
+        .validation-message.success {
+            color: #2ecc40;
+        }
+        .validation-message.error {
+            color: #e74c3c;
+        }
+        .validation-message.warning {
+            color: #ffc107;
+        }
+        .format-help {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+        .submit-btn {
+            background: #1976d2;
+            color: #fff;
+            padding: 14px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+        }
+        .submit-btn:hover:enabled {
+            background: #125ea2;
+        }
+        .submit-btn:disabled {
+            background: #b0b8c1;
+            color: #fff;
+            cursor: not-allowed;
+        }
+        .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #1976d2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .msg-server {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 1em;
+            text-align: center;
+        }
+        .msg-server.success {
+            color: #2ecc40;
+            background: #eafaf1;
+        }
+        .msg-server.error {
+            color: #e74c3c;
+            background: #fdeaea;
+        }
+        .links {
+            margin-top: 24px;
+            text-align: center;
+        }
+        .links a {
+            color: #1976d2;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.98em;
+            transition: color 0.2s;
+        }
+        .links a:hover {
+            color: #125ea2;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-form">
+        <h1>Registrar Entrada de Vehículo</h1>
+
+        <!-- Mensajes de éxito o error del servidor -->
+        <div th:if="${mensaje}" class="msg-server success">
+            <p th:text="${mensaje}"></p>
+        </div>
+        <div th:if="${error}" class="msg-server error">
+            <p th:text="${error}"></p>
+        </div>
+
+        <form th:action="@{/vehiculos/registrar-entrada}" method="post" th:object="${vehiculo}" id="entradaForm">
+            <!-- Campo de Placa con Validación Mejorada -->
+            <div class="validation-container">
+                <label for="placaInput">Placa del Vehículo:</label>
+                <input type="text" 
+                       th:field="*{placa}" 
+                       id="placaInput" 
+                       class="input-field"
+                       placeholder="ABC-123 o ABC-1234" 
+                       required 
+                       maxlength="9"
+                       pattern="[A-Z]{3}-[0-9]{3,4}"
+                       title="Formato: ABC-123 o ABC-1234 (3 letras, guión, 3 o 4 números)"
+                       oninput="validarPlacaEnTiempoReal(this.value)"
+                       onblur="validarPlacaCompleta(this.value)" />
+                <div id="mensajeValidacion" class="validation-message"></div>
+                <div class="format-help">
+                    Use el formato: ABC-123 o ABC-1234 (3 letras mayúsculas, guión, 3 o 4 números)
+                </div>
+                <div id="loadingSpinner" class="loading-spinner"></div>
+            </div>
+            <!-- Campo de Tipo de Vehículo -->
+            <div class="validation-container">
+                <label for="tipoVehiculo">Tipo de Vehículo:</label>
+                <select th:field="*{tipo}" id="tipoVehiculo" class="input-field" required>
+                    <option value="">Seleccione un tipo</option>
+                    <option value="carro">Carro</option>
+                    <option value="moto">Moto</option>
+                    <option value="camioneta">Camioneta</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+            <!-- Campo de Plaza con Validación -->
+            <div class="validation-container">
+                <label for="plazaInput">Número de Plaza:</label>
+                <input type="text" 
+                       th:field="*{plazaAsignada}" 
+                       id="plazaInput"
+                       class="input-field"
+                       required 
+                       pattern="[A-Za-z][0-9]{1,3}"
+                       title="Formato: Letra seguida de 1 a 3 números. Ejemplo: A1, B12, C100"
+                       oninput="validarPlaza(this.value)" />
+                <div id="mensajePlaza" class="validation-message"></div>
+                <div class="format-help">
+                    Ingrese una plaza válida. Ejemplo: A1, B2, C15
+                </div>
+            </div>
+            <!-- Botón de Envío -->
+            <button type="submit" id="submitBtn" class="submit-btn" disabled>
+                Registrar Entrada
+            </button>
+        </form>
+        <div class="links">
+            <a th:href="@{/vehiculos/formulario-salida}">Ir a Salida</a>            <a th:href="@{/vehiculos/historial}">Ver Historial</a>            <a th:href="@{/dashboard}">Volver al Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        let timeoutId;
+        let placaValida = false;
+        let plazaValida = false;
+
+        // Validación en tiempo real de la placa
+        function validarPlacaEnTiempoReal(placa) {
+            const mensaje = document.getElementById('mensajeValidacion');
+            const input = document.getElementById('placaInput');
+            const spinner = document.getElementById('loadingSpinner');
+
+            clearTimeout(timeoutId);
+
+            // Limpiar estado anterior
+            input.classList.remove('valid', 'invalid');
+            placaValida = false;
+            actualizarBotonEnvio();
+
+            if (placa.length < 3) {
+                mensaje.innerHTML = '';
+                return;
+            }
+
+            // Validación de formato básico en el cliente (ABC-123 o ABC-1234)
+            const formatoBasico = /^[A-Z]{3}-[0-9]{3,4}$/;
+            if (!formatoBasico.test(placa)) {
+                mensaje.innerHTML = '❌ Formato incorrecto. Use ABC-123 o ABC-1234';
+                mensaje.className = 'validation-message error';
+                input.classList.add('invalid');
+                return;
+            }
+
+            // Mostrar spinner de carga
+            spinner.style.display = 'inline-block';
+
+            timeoutId = setTimeout(() => {
+                fetch('/vehiculos/validar-placa', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'placa=' + encodeURIComponent(placa)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    spinner.style.display = 'none';
+                    
+                    if (data.valida) {
+                        mensaje.innerHTML = '✅ ' + data.mensaje;
+                        mensaje.className = 'validation-message success';
+                        input.classList.add('valid');
+                        placaValida = true;
+                    } else {
+                        mensaje.innerHTML = '❌ ' + (data.mensaje || "Formato incorrecto");
+                        mensaje.className = 'validation-message error';
+                        input.classList.add('invalid');
+                        placaValida = false;
+                    }
+                    actualizarBotonEnvio();
+                })
+                .catch(error => {
+                    spinner.style.display = 'none';
+                    mensaje.innerHTML = '⚠️ Error al validar la placa';
+                    mensaje.className = 'validation-message warning';
+                    input.classList.add('invalid');
+                    placaValida = false;
+                    actualizarBotonEnvio();
+                });
+            }, 500);
+        }
+
+        // Validación completa cuando el usuario sale del campo
+        function validarPlacaCompleta(placa) {
+            const formatoCompleto = /^[A-Z]{3}-[0-9]{3,4}$/;
+            const mensaje = document.getElementById('mensajeValidacion');
+            const input = document.getElementById('placaInput');
+
+            if (placa && !formatoCompleto.test(placa)) {
+                mensaje.innerHTML = '❌ Formato incompleto. Debe ser ABC-123 o ABC-1234';
+                mensaje.className = 'validation-message error';
+                input.classList.remove('valid');
+                input.classList.add('invalid');
+                placaValida = false;
+                actualizarBotonEnvio();
+            }
+        }
+
+        // Validación de plaza
+        function validarPlaza(plaza) {
+            const mensaje = document.getElementById('mensajePlaza');
+            const input = document.getElementById('plazaInput');
+
+            input.classList.remove('valid', 'invalid');
+            plazaValida = false;
+
+            if (plaza === '') {
+                mensaje.innerHTML = '';
+                actualizarBotonEnvio();
+                return;
+            }
+
+            const formatoPlaza = /^[A-Za-z]\d{1,3}$/; // Ej: A1, A12, B100
+            if (!formatoPlaza.test(plaza)) {
+                mensaje.innerHTML = '❌ Formato inválido. Use formato como A1, B2, etc.';
+                mensaje.className = 'validation-message error';
+                input.classList.add('invalid');
+            } else {
+                // Extraer solo la parte numérica para validar el rango
+                const numero = parseInt(plaza.substring(1), 10);
+                if (isNaN(numero) || numero < 1 || numero > 100) {
+                    mensaje.innerHTML = '⚠️ Plaza debe estar entre 1 y 100';
+                    mensaje.className = 'validation-message warning';
+                    input.classList.add('invalid');
+                } else {
+                    mensaje.innerHTML = '✅ Plaza válida';
+                    mensaje.className = 'validation-message success';
+                    input.classList.add('valid');
+                    plazaValida = true;
+                }
+            }
+            actualizarBotonEnvio();
+        }
+
+        // Actualizar estado del botón de envío
+        function actualizarBotonEnvio() {
+            const submitBtn = document.getElementById('submitBtn');
+            const tipoVehiculo = document.getElementById('tipoVehiculo').value;
+            
+            if (placaValida && plazaValida && tipoVehiculo !== '') {
+                submitBtn.disabled = false;
+                submitBtn.style.backgroundColor = '#007bff';
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.style.backgroundColor = '#6c757d';
+            }
+        }
+
+        // Validar tipo de vehículo
+        document.getElementById('tipoVehiculo').addEventListener('change', function() {
+            actualizarBotonEnvio();
+        });
+
+        // Prevenir envío si hay errores de validación
+        document.getElementById('entradaForm').addEventListener('submit', function(e) {
+            if (!placaValida || !plazaValida) {
+                e.preventDefault();
+                alert('Por favor, corrija los errores de validación antes de continuar.');
+            }
+        });
+
+        // Convertir a mayúsculas automáticamente
+        document.getElementById('placaInput').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>
